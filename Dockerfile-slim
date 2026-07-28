@@ -1,0 +1,29 @@
+FROM alpine:latest
+
+ARG APP_CMD="python3 -m http.server 8000"
+ENV APP_CMD="$APP_CMD"
+
+RUN apk update && apk add --no-cache strace findutils coreutils python3 wget
+COPY used_files.txt /tmp/used_files.txt
+
+RUN sh -c 'find /bin /sbin /usr/bin /usr/sbin /lib /usr/lib -type f,l | while read -r file; do \
+        case "$file" in \
+            */sh|*/ash|*/basename|*/dirname|*/echo|*/grep|*/rm|*/cat|*/sed|*/env|*/python3*) continue ;; \
+        esac; \
+        if ! grep -qxF "$file" /tmp/used_files.txt; then \
+            rm -f "$file"; \
+        fi; \
+    done' && \
+    rm -rf /usr/lib/python3.14/test \
+           /usr/lib/python3.14/unittest \
+           /usr/lib/python3.14/sqlite3 \
+           /usr/lib/python3.14/tkinter \
+           /usr/lib/python3.14/ensurepip \
+           /usr/lib/python3.14/pydoc_data \
+           /usr/lib/python3.14/distutils \
+           /usr/lib/python3.14/idlelib && \
+    find /bin /sbin /usr/bin /usr/sbin /lib /usr/lib -type d -empty -delete 2>/dev/null || true && \
+    rm -f /tmp/used_files.txt
+
+WORKDIR /app
+ENTRYPOINT sh -c "$APP_CMD"
