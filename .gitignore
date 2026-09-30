@@ -1,8 +1,5 @@
 /*
 !Dockerfile
-!entrypoint.sh
-!Dockerfile-slim
 !README.md
 !used_files.txt
-!image.png
 !.gitignore
